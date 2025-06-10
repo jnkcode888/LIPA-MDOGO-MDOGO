@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import './LandingHero.css';
+import logo1 from '../assets/logo1.png';
+import logo2 from '../assets/logo2.png';
+import logo3 from '../assets/logo3.png';
 
 const benefitData = [
   { icon: '💸', title: 'Affordable', desc: 'Pay in easy, flexible installments.' },
@@ -9,9 +12,9 @@ const benefitData = [
 ];
 
 const trustedLogos = [
-  'src/assets/logo1.png',
-  'src/assets/logo2.png',
-  'src/assets/logo3.png',
+  logo1,
+  logo2,
+  logo3,
 ];
 
 const LandingHero = ({ onGetStarted }) => (
