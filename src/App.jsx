@@ -42,6 +42,7 @@ function AppContent() {
         >
           <ProgressBar />
           <Routes>
+            <Route path="/step1" element={<Step1BasicInfo />} />
             <Route path="/step2" element={<Step2Purpose />} />
             <Route path="/step3" element={<Step3Features />} />
             <Route path="/step4" element={<Step4Design />} />

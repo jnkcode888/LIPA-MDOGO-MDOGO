@@ -22,7 +22,7 @@ const LandingHero = () => {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate('/step2');
+    navigate('/step1');
   };
 
   return (
