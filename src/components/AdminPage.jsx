@@ -1,77 +1,119 @@
-import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient.js';
 import './AdminPage.css';
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.08, type: 'spring', stiffness: 80 }
-  })
-};
-
 const AdminPage = () => {
-  const [requests, setRequests] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchRequests = async () => {
-      setLoading(true);
-      setError('');
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
       const { data, error } = await supabase
         .from('website_requests')
         .select('*')
         .order('created_at', { ascending: false });
-      if (error) setError('Failed to fetch data.');
-      else setRequests(data);
+
+      if (error) throw error;
+      console.log('Fetched data:', data);
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError(error.message);
+    } finally {
       setLoading(false);
-    };
-    fetchRequests();
-  }, []);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (loading) return <div className="admin-loading">Loading...</div>;
+  if (error) return <div className="admin-error">Error: {error}</div>;
 
   return (
     <div className="admin-container">
-      <h1 className="admin-title">Website Requests Admin</h1>
-      {loading && <div className="admin-loading">Loading...</div>}
-      {error && <div className="admin-error">{error}</div>}
+      <h1>Website Requests Dashboard</h1>
       <div className="admin-grid">
-        {requests.map((req, i) => (
-          <motion.div
-            className="admin-card"
-            key={req.id}
-            custom={i}
-            initial="hidden"
-            animate="visible"
-            variants={cardVariants}
-            whileHover={{ scale: 1.03, boxShadow: '0 8px 32px rgba(80,80,180,0.12)' }}
-          >
+        {users.map((user) => (
+          <div key={user.id} className="admin-card">
             <div className="admin-card-header">
-              <span className="admin-card-status {req.status}">{req.status || 'pending'}</span>
-              <span className="admin-card-date">{new Date(req.created_at).toLocaleString()}</span>
+              <h2>{user.businessDescription || 'New Request'}</h2>
+              <span className="admin-date">{formatDate(user.created_at)}</span>
             </div>
-            <div className="admin-card-body">
-              <h2>{req.name || req.fullName}</h2>
-              <p><b>Email:</b> {req.email}</p>
-              <p><b>WhatsApp:</b> {req.whatsapp}</p>
-              <p><b>Website Type:</b> {req.websiteType || req.websiteTypes || req.businesstype || req.businessDescription}</p>
-              <p><b>Features:</b> {Array.isArray(req.features) ? req.features.join(', ') : req.features}</p>
-              <p><b>Budget:</b> {req.budget || req.budgetRange}</p>
-              <p><b>Deadline:</b> {req.deadline || req.completionDate}</p>
-              <p><b>Status:</b> {req.status}</p>
+            
+            <div className="admin-card-section">
+              <h3>Contact Information</h3>
+              <p><strong>Full Name:</strong> {user.fullName}</p>
+              <p><strong>WhatsApp:</strong> {user.whatsapp}</p>
+              <p><strong>Email:</strong> {user.email}</p>
             </div>
+
+            <div className="admin-card-section">
+              <h3>Business Details</h3>
+              <p><strong>Business Description:</strong> {user.businessDescription}</p>
+              <p><strong>Website Types:</strong> {user.websiteTypes?.join(', ')}</p>
+              <p><strong>Target Audience:</strong> {user.targetAudience}</p>
+              <p><strong>Competitors:</strong> {user.competitors}</p>
+            </div>
+
+            <div className="admin-card-section">
+              <h3>Features</h3>
+              <p><strong>Selected Features:</strong> {user.features?.join(', ')}</p>
+              <p><strong>Additional Features:</strong> {user.additionalFeatures}</p>
+            </div>
+
+            <div className="admin-card-section">
+              <h3>Design Preferences</h3>
+              <p><strong>Branding:</strong> {user.branding}</p>
+              <p><strong>Design Styles:</strong> {user.designStyles?.join(', ')}</p>
+              <p><strong>Reference Websites:</strong> {user.referenceWebsites}</p>
+            </div>
+
+            <div className="admin-card-section">
+              <h3>Technical Requirements</h3>
+              <p><strong>Technical Needs:</strong> {user.technicalrequirements}</p>
+              <p><strong>Hosting Preferences:</strong> {user.hostingpreferences}</p>
+              <p><strong>Maintenance:</strong> {user.maintenance}</p>
+            </div>
+
+            <div className="admin-card-section">
+              <h3>Timeline & Budget</h3>
+              <p><strong>Timeline:</strong> {user.timeline}</p>
+              <p><strong>Budget Range:</strong> {user.budgetRange}</p>
+              <p><strong>Budget:</strong> {user.budget}</p>
+              <p><strong>Deadline:</strong> {user.deadline}</p>
+            </div>
+
+            <div className="admin-card-section">
+              <h3>Payment Details</h3>
+              <p><strong>Payment Option:</strong> {user.paymentoption}</p>
+              <p><strong>Deposit Amount:</strong> {user.depositamount}</p>
+              <p><strong>Installments:</strong> {user.installments}</p>
+              <p><strong>Installment Amount:</strong> {user.installmentamount}</p>
+            </div>
+
+            <div className="admin-card-section">
+              <h3>Additional Information</h3>
+              <p><strong>Additional Notes:</strong> {user.additionalNotes}</p>
+              <p><strong>Uploaded Files:</strong> {user.files?.length || 0} files</p>
+            </div>
+
             <div className="admin-card-footer">
-              <a href={`mailto:${req.email}`} className="admin-card-action">Email</a>
-              <a href={`https://wa.me/${req.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="admin-card-action">WhatsApp</a>
+              <span className="admin-status">Status: {user.status || 'New'}</span>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>
